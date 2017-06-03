@@ -1,0 +1,164 @@
+# by Rémi H.
+# ce document, permet des configurations de Symfony, notament pour les bundles : easyadmin et rest API (fos_rest et nelmio_cors)
+
+imports:
+    - { resource: parameters.yml }
+    - { resource: security.yml }
+    - { resource: services.yml }
+    - { resource: "@PPE4Bundle/Resources/config/services.yml" }
+
+# Put parameters here that don't need to change on each machine where the app is deployed
+# http://symfony.com/doc/current/best_practices/configuration.html#application-related-configuration
+parameters:
+    locale: en
+
+framework:
+    #esi:             ~
+    #translator:      { fallbacks: ["%locale%"] }
+    secret:          "%secret%"
+    router:
+        resource: "%kernel.root_dir%/config/routing.yml"
+        strict_requirements: ~
+    form:            ~
+    csrf_protection: ~
+    validation:      { enable_annotations: true }
+    #serializer:      { enable_annotations: true }
+    templating:
+        engines: ['twig']
+    default_locale:  "%locale%"
+    trusted_hosts:   ~
+    trusted_proxies: ~
+    session:
+        # http://symfony.com/doc/current/reference/configuration/framework.html#handler-id
+        handler_id:  session.handler.native_file
+        save_path:   "%kernel.root_dir%/../var/sessions/%kernel.environment%"
+    fragments:       ~
+    http_method_override: true
+    assets: ~
+    php_errors:
+        log: true
+
+# Twig Configuration
+twig:
+    debug:            "%kernel.debug%"
+    strict_variables: "%kernel.debug%"
+
+# Doctrine Configuration
+doctrine:
+    dbal:
+        driver:   pdo_mysql
+        host:     "%database_host%"
+        port:     "%database_port%"
+        dbname:   "%database_name%"
+        user:     "%database_user%"
+        password: "%database_password%"
+        charset:  UTF8
+        # if using pdo_sqlite as your database driver:
+        #   1. add the path in parameters.yml
+        #     e.g. database_path: "%kernel.root_dir%/../var/data/data.sqlite"
+        #   2. Uncomment database_path in parameters.yml.dist
+        #   3. Uncomment next line:
+        #path:     "%database_path%"
+
+    orm:
+        auto_generate_proxy_classes: "%kernel.debug%"
+        naming_strategy: doctrine.orm.naming_strategy.underscore
+        auto_mapping: true
+        # entity_managers:
+        #     defaults:
+        #         mappings:
+        #             PPE4/Bundle: ~
+
+# Nelmio CORS Configuration
+nelmio_cors:
+    defaults:
+        allow_credentials: false
+        allow_origin: ['*']
+        allow_headers: ['*']
+        allow_methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
+        max_age: 3600
+        hosts: []
+        origin_regex: false
+ 
+# FOSRest Configuration
+fos_rest:
+    body_listener: true
+    format_listener:
+        rules:
+            - { path: '^/admin', stop: true }  # <-- ajouter cette lignes
+            - { path: '^/', priorities: ['json'], fallback_format: json, prefer_extension: false }
+    param_fetcher_listener: true
+    view:
+        view_response_listener: 'force'
+        formats:
+            json: true
+
+
+# Swiftmailer Configuration
+swiftmailer:
+    transport: "%mailer_transport%"
+    host:      "%mailer_host%"
+    username:  "%mailer_user%"
+    password:  "%mailer_password%"
+    spool:     { type: memory }
+
+easy_admin:
+    site_name: 'agglo <em style="font-size: 80%; color: yellow">signalement.</em>'
+    
+    design:
+        brand_color: 'rgba(46,142,206,1.0)'  
+
+        menu:
+            - { label : 'Les données'}
+            - Administre
+            - Signalement
+            - TypeDeSignalement
+
+    list:
+        actions:
+            - { name : 'edit', label: 'Modifier', icon : 'pencil' }
+            - { name : 'new', label: 'Créer', icon : 'plus-square'}
+            - { name: 'search', label: 'Recherche', icon : 'search' }
+            - { name : 'delete', label: 'Supprimer', icon : 'remove' }
+
+    entities:
+        Administre:
+            class: PPE4\Bundle\Entity\Administre
+            label: "Les administrés"
+            list:
+                title: "Les administrés"
+                fields:
+                    - { property: 'identifiant', lavel: 'identifiant' }
+                    - { property: 'prenom', label: 'prenom' }
+                    - { property: 'nom', label: 'nom' }
+                    - { property: 'motDePasse', label: 'mot de passe',type: 'password' }
+                    - { property: 'dateNaissance', label: 'date de naissance'}
+                    - { property: 'numero', label: 'numéro de rue' }
+                    - { property: 'rue', label: 'rue' }
+                    - { property: 'codePostal', label: 'code postal' }
+                    - { property: 'ville', label: 'ville' }
+            form:
+                - { property : 'motDePasse', type: 'password', label: 'Mot de passe', value: 'password'}
+
+        Signalement:
+            class: PPE4\Bundle\Entity\Signalement
+            label: "Les signalements"
+            list:
+                title: "Les signalements"
+                fields:
+                    - { property: 'administre', label: 'administré' }
+                    - { property: 'TypeDeSignalement', label: 'Type de signalement' }
+                    - { property: 'objet', label: 'objet' }
+                    - { property: 'heureDate', label: 'heure et date' }
+                    - { property: 'longitude', label: 'longitude' }
+                    - { property: 'latitude', label: 'latitude' }
+                    - { property: 'description', label: 'description' }
+
+        TypeDeSignalement:
+            class: PPE4\Bundle\Entity\TypeDeSignalement
+            label: "Les types de signalements"
+            list:
+                title: "Les types de signalements"
+                fields:
+                    - { property: 'libelle', lavel: 'libelle' }
+

@@ -1,0 +1,4 @@
+services:
+#    ppe4.example:
+#        class: PPE4\Bundle\Example
+#        arguments: ["@service_id", "plain_value", "%parameter%"]
